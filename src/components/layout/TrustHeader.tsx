@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useProcessing } from '@/context/ProcessingContext'
 import { NeoButton } from '@/components/ui/NeoButton'
 
@@ -10,13 +11,13 @@ export function TrustHeader() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-[60px] bg-base border-b-2 border-black flex items-center justify-between px-6">
       {/* Logo */}
-      <a
+      <Link
         href="/"
         className="font-mono font-black text-primary text-xl border-2 border-primary px-3 py-1 leading-none hover:bg-primary hover:text-base transition-colors duration-100"
         aria-label="PicSize Pro home"
       >
         &lt;PIC-TRANSFORM/&gt;
-      </a>
+      </Link>
 
       {/* Nav links */}
       <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">

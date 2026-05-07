@@ -70,6 +70,7 @@ export function UploadZone() {
           <div className="flex flex-col items-center gap-4">
             {/* Thumbnail */}
             <div className="border-2 border-black overflow-hidden bg-base" style={{ maxWidth: 200, maxHeight: 200 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={preview}
                 alt="Uploaded image preview"
