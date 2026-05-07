@@ -10,8 +10,7 @@
 ## Phase Overview
 
 | # | Phase | Goal | Requirements | Criteria |
-|---|-------|------|--------------|----------|
-| 1 | Project Scaffolding & Upload | Next.js app boots; users can upload any supported image format and see a preview | UPLD-01, UPLD-02, UPLD-03, UPLD-04 | 4 |
+|---|-------|------|--------------|----------| 1 | Project Scaffolding & Upload | Next.js app boots; users can upload any supported image format and see a preview | UPLD-01, UPLD-02, UPLD-03, UPLD-04 | ✅ 4/4 |
 | 2 | Compression Engine | Recursive server-side compression hits an exact max file size target | COMP-01, COMP-02, COMP-03, COMP-04, COMP-05 | 5 |
 | 3 | Resize & Aspect Ratio Engine | Users can specify dimensions; system resizes with ratio-lock and smart crop | RSZR-01, RSZR-02, RSZR-03, RSZR-04 | 4 |
 | 4 | Format Conversion | Bi-directional conversion between all supported formats including HEIC and RAW | CONV-01, CONV-02, CONV-03 | 3 |
@@ -22,7 +21,7 @@
 
 ## Phase Details
 
-### Phase 1: Project Scaffolding & Upload
+### Phase 1: Project Scaffolding & Upload (✅ COMPLETE)
 
 **Goal:** Bootstrap the Next.js 16 App Router project, configure Sharp and WASM build pipeline, and deliver a working upload flow with instant preview and file metadata display.
 
@@ -35,19 +34,19 @@
 - UPLD-04: User sees file metadata on upload (original format, dimensions, file size)
 
 **Success Criteria:**
-1. `npx create-next-app@latest` scaffolding runs cleanly; dev server starts at `localhost:3000`
-2. User can drag-and-drop or click to pick a HEIC, RAW, WEBP, PNG, JPG, SVG, or TIFF file
-3. A preview thumbnail of the uploaded image appears within 500ms of file selection
-4. File metadata panel shows: original format, pixel dimensions, and file size in KB/MB
-5. Invalid file types are rejected with a clear error message
+1. ✅ `npx create-next-app@latest` scaffolding runs cleanly; dev server starts at `localhost:3000`
+2. ✅ User can drag-and-drop or click to pick a HEIC, RAW, WEBP, PNG, JPG, SVG, or TIFF file
+3. ✅ A preview thumbnail of the uploaded image appears within 500ms of file selection
+4. ✅ File metadata panel shows: original format, pixel dimensions, and file size in KB/MB
+5. ✅ Invalid file types are rejected with a clear error message
 
 **Depends on:** None
 
 **Plans:**
-- 1.1 — Scaffold Next.js 16 App Router project with TypeScript, Tailwind, ESLint
-- 1.2 — Install and configure Sharp, heic-convert, and WASM build pipeline
-- 1.3 — Build upload component (drag-and-drop + file picker) with format validation
-- 1.4 — Build preview pane and metadata extraction (format, dimensions, size)
+- ✅ 1.1 — Scaffold Next.js 16 App Router project with TypeScript, Tailwind, ESLint
+- ✅ 1.2 — Install and configure Sharp, heic-convert, and WASM build pipeline
+- ✅ 1.3 — Build upload component (drag-and-drop + file picker) with format validation
+- ✅ 1.4 — Build preview pane and metadata extraction (format, dimensions, size)
 
 ---
 
@@ -206,4 +205,4 @@
 ---
 *Roadmap created: 2026-04-23*
 *Milestone: M1 — MVP (v1)*
-*Next action: `/gsd-plan-phase 1`*
+*Next action: `/gsd-plan-phase 2`*
