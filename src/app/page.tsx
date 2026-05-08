@@ -1,6 +1,7 @@
 import { TrustHeader } from '@/components/layout/TrustHeader'
 import { UploadZone } from '@/components/upload/UploadZone'
 import { MetadataPanel } from '@/components/upload/MetadataPanel'
+import { ControlsPanel } from '@/components/controls/ControlsPanel'
 
 export default function Home() {
   return (
@@ -27,18 +28,9 @@ export default function Home() {
             <MetadataPanel />
           </div>
 
-          {/* RIGHT: Controls Panel (40%) — placeholder until Phase 2 */}
+          {/* RIGHT: Controls Panel (40%) */}
           <div className="w-full lg:w-[40%] flex flex-col gap-6">
-            <div className="relative shadow-neo-sm">
-              <div className="border-2 border-black bg-surface p-6">
-                <p className="font-mono text-muted text-xs uppercase tracking-widest mb-4">
-                  CONVERSION CONTROLS
-                </p>
-                <p className="font-mono text-muted text-xs">
-                  Target format, compression, and resize options — Phase 2
-                </p>
-              </div>
-            </div>
+            <ControlsPanel />
           </div>
 
         </div>

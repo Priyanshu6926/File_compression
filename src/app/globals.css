@@ -28,7 +28,7 @@
     font-family: var(--font-sans);
     overflow-x: hidden;
   }
-  
+
   ::selection {
     background-color: var(--color-primary);
     color: #000;
