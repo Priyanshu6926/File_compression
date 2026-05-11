@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     const result = await compressToSize({ 
       buffer, 
       targetSizeBytes, 
-      format: 'jpeg', // Hardcoded to jpeg for Phase 2, Phase 4 makes this dynamic
+      format: 'jpeg',
       width,
       height,
       ...(crop ? { crop } : {})
