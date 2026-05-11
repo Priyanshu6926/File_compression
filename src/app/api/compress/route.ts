@@ -6,6 +6,14 @@ export async function POST(request: Request) {
     const formData = await request.formData()
     const file = formData.get('file') as File | null
     const targetSizeKB = Number(formData.get('targetSizeKB'))
+    
+    // New resize parameters
+    const widthRaw = formData.get('width')
+    const heightRaw = formData.get('height')
+    const crop = formData.get('crop') as 'center' | 'top' | 'entropy' | null
+
+    const width = widthRaw ? Number(widthRaw) : undefined
+    const height = heightRaw ? Number(heightRaw) : undefined
 
     if (!file || !targetSizeKB) {
       return NextResponse.json({ error: 'Missing file or targetSizeKB' }, { status: 400 })
@@ -17,7 +25,10 @@ export async function POST(request: Request) {
     const result = await compressToSize({ 
       buffer, 
       targetSizeBytes, 
-      format: 'jpeg' // Hardcoded to jpeg for Phase 2, Phase 4 makes this dynamic
+      format: 'jpeg', // Hardcoded to jpeg for Phase 2, Phase 4 makes this dynamic
+      width,
+      height,
+      ...(crop ? { crop } : {})
     })
 
     // Return the processed buffer
