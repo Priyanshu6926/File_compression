@@ -13,9 +13,10 @@ export function ControlsPanel() {
   const [height, setHeight] = useState('')
   const [isSmartCrop, setIsSmartCrop] = useState(false)
   const [cropAnchor, setCropAnchor] = useState<'center' | 'top' | 'entropy'>('center')
+  const [format, setFormat] = useState<'jpeg' | 'png' | 'webp' | 'avif' | 'tiff'>('jpeg')
   
   const [isProcessing, setIsProcessing] = useState(false)
-  const [result, setResult] = useState<{ url: string; size: number; hitFloor: boolean } | null>(null)
+  const [result, setResult] = useState<{ url: string; size: number; hitFloor: boolean; format: string } | null>(null)
 
   const handleCompress = async () => {
     if (!file) return
@@ -26,6 +27,7 @@ export function ControlsPanel() {
       const formData = new FormData()
       formData.append('file', file)
       formData.append('targetSizeKB', targetSize)
+      formData.append('format', format)
       if (width) formData.append('width', width)
       if (height) formData.append('height', height)
       if (isSmartCrop) formData.append('crop', cropAnchor)
@@ -41,8 +43,9 @@ export function ControlsPanel() {
       const url = URL.createObjectURL(blob)
       const newSize = Number(res.headers.get('X-New-Size'))
       const hitFloor = res.headers.get('X-Hit-Floor') === 'true'
+      const ext = format === 'jpeg' ? 'jpg' : format
 
-      setResult({ url, size: newSize, hitFloor })
+      setResult({ url, size: newSize, hitFloor, format: ext })
     } catch (err) {
       console.error(err)
       alert('Error during compression.')
@@ -51,13 +54,38 @@ export function ControlsPanel() {
     }
   }
 
+  const formatOptions = ['jpeg', 'png', 'webp', 'avif', 'tiff'] as const
+
   return (
     <div className="flex flex-col gap-6">
       <div className="relative shadow-neo-sm">
         <div className="border-2 border-black bg-surface p-6 flex flex-col gap-6">
           
-          {/* Section B: Max File Size */}
+          {/* Section A: Target Format */}
           <div>
+            <p className="font-mono text-muted text-xs uppercase tracking-widest mb-4">
+              TARGET FORMAT
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {formatOptions.map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => setFormat(opt)}
+                  className={cn(
+                    "border-2 border-black font-mono text-sm px-4 py-2 uppercase transition-all duration-200",
+                    format === opt 
+                      ? "bg-primary text-black font-bold shadow-[4px_4px_0px_0px_#000] -translate-y-1 -translate-x-1" 
+                      : "bg-surface text-text hover:bg-surface-alt hover:-translate-y-0.5 hover:-translate-x-0.5 hover:shadow-[2px_2px_0px_0px_#000]"
+                  )}
+                >
+                  {opt === 'jpeg' ? 'jpg' : opt}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Section B: Max File Size */}
+          <div className="border-t-2 border-black pt-6">
             <p className="font-mono text-muted text-xs uppercase tracking-widest mb-4">
               MAX FILE SIZE (KB)
             </p>
@@ -161,7 +189,7 @@ export function ControlsPanel() {
             </p>
             <a
               href={result.url}
-              download={`compressed-${file?.name || 'image'}.jpg`}
+              download={`compressed-${file?.name || 'image'}.${result.format}`}
               className="inline-flex items-center justify-center border-2 border-black bg-primary text-black font-mono font-bold text-sm uppercase tracking-tight px-4 py-2 w-full hover:bg-white transition-colors"
             >
               DOWNLOAD

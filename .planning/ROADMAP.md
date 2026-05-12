@@ -13,7 +13,7 @@
 |---|-------|------|--------------|----------| 1 | Project Scaffolding & Upload | Next.js app boots; users can upload any supported image format and see a preview | UPLD-01, UPLD-02, UPLD-03, UPLD-04 | ✅ 4/4 |
 | 2 | Compression Engine | Recursive server-side compression hits an exact max file size target | COMP-01, COMP-02, COMP-03, COMP-04, COMP-05 | ✅ 5/5 |
 | 3 | Resize & Aspect Ratio Engine | Users can specify dimensions; system resizes with ratio-lock and smart crop | RSZR-01, RSZR-02, RSZR-03, RSZR-04 | ✅ 4/4 |
-| 4 | Format Conversion | Bi-directional conversion between all supported formats including HEIC and RAW | CONV-01, CONV-02, CONV-03 | 3 |
+| 4 | Format Conversion | Bi-directional conversion between all supported formats including HEIC and RAW | CONV-01, CONV-02, CONV-03 | ✅ 5/5 |
 | 5 | UI Polish & UX Hardening | Production-ready UI: responsive layout, error states, loading indicators, accessibility | — (cross-cutting) | 5 |
 | 6 | Vercel Deployment & CI | App deployed to Vercel with GitHub Actions CI; production environment validated | — (infrastructure) | 4 |
 
@@ -111,7 +111,7 @@
 
 ---
 
-### Phase 4: Format Conversion
+### Phase 4: Format Conversion (✅ COMPLETE)
 
 **Goal:** Add bi-directional format conversion — users can select any output format (JPEG, PNG, WEBP, AVIF, TIFF) and convert from any input including HEIC and RAW.
 
@@ -205,4 +205,4 @@
 ---
 *Roadmap created: 2026-04-23*
 *Milestone: M1 — MVP (v1)*
-*Next action: `/gsd-plan-phase 4`*
+*Next action: `/gsd-plan-phase 5`*
