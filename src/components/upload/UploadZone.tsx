@@ -99,10 +99,11 @@ export function UploadZone() {
         tabIndex={0}
         aria-label="Upload image — drag and drop or click to browse"
         className={cn(
-          'bg-surface rounded min-h-[320px] flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-150',
-          borderStyles[state],
-          shadowStyles[state],
-          state === 'dragover' && 'bg-surface-alt'
+          'bg-surface rounded min-h-[320px] flex flex-col items-center justify-center gap-4 cursor-pointer transition-all duration-300 ease-out',
+          state === 'idle' && 'border-dashed border-2 border-black hover:-translate-y-1 hover:-translate-x-1 hover:shadow-neo-sm hover:bg-surface-alt',
+          state === 'dragover' && 'border-4 border-primary scale-[1.02] bg-primary/10 shadow-neo-primary',
+          state === 'loading' && 'border-2 border-success',
+          state === 'error' && 'border-2 border-error'
         )}
         onClick={() => inputRef.current?.click()}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') inputRef.current?.click() }}
@@ -120,13 +121,18 @@ export function UploadZone() {
         />
 
         {state === 'loading' ? (
-          <p className="font-mono text-success text-sm animate-pulse font-bold tracking-widest">READING FILE...</p>
+          <p className="font-mono text-success text-sm animate-pulse font-bold tracking-widest flex items-center gap-2">
+            <span className="w-4 h-4 border-2 border-success border-t-transparent rounded-full animate-spin"></span>
+            READING FILE...
+          </p>
         ) : (
           <>
             {/* Upload icon */}
-            <svg className="group-hover:scale-110 transition-transform duration-200" width="48" height="48" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M12 3v13M7 8l5-5 5 5M5 19h14" stroke="#f5d547" strokeWidth="2.5" strokeLinecap="square" strokeLinejoin="miter"/>
-            </svg>
+            <div className="w-20 h-20 mb-2 bg-base border-2 border-black flex items-center justify-center shadow-[4px_4px_0px_0px_#000] group-hover:-translate-y-2 group-hover:shadow-[4px_8px_0px_0px_#000] transition-all duration-300">
+              <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 3v13M7 8l5-5 5 5M5 19h14" stroke="#f5d547" strokeWidth="2.5" strokeLinecap="square" strokeLinejoin="miter"/>
+              </svg>
+            </div>
 
             <p className="font-black text-primary text-2xl uppercase tracking-tight text-center px-4">
               DROP FILES HERE

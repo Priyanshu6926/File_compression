@@ -3,10 +3,17 @@
 import Link from 'next/link'
 import { useProcessing } from '@/context/ProcessingContext'
 import { NeoButton } from '@/components/ui/NeoButton'
+import { useTheme } from "next-themes"
+import { useEffect, useState } from "react"
 
 export function TrustHeader() {
   const { mode, toggleMode } = useProcessing()
   const isPrivate = mode === 'client'
+  
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-[60px] bg-base border-b-2 border-black flex items-center justify-between px-6">
@@ -56,6 +63,17 @@ export function TrustHeader() {
         >
           [{isPrivate ? 'CLIENT' : 'SERVER'}]
         </NeoButton>
+
+        {/* Theme Toggle */}
+        {mounted && (
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="w-10 h-10 border-2 border-black bg-surface flex items-center justify-center shadow-neo-sm hover:-translate-y-0.5 hover:-translate-x-0.5 hover:shadow-neo-primary transition-all ml-2"
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+        )}
       </div>
     </header>
   )
