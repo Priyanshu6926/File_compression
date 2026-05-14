@@ -15,7 +15,7 @@
 | 3 | Resize & Aspect Ratio Engine | Users can specify dimensions; system resizes with ratio-lock and smart crop | RSZR-01, RSZR-02, RSZR-03, RSZR-04 | ✅ 4/4 |
 | 4 | Format Conversion | Bi-directional conversion between all supported formats including HEIC and RAW | CONV-01, CONV-02, CONV-03 | ✅ 5/5 |
 | 5 | UI Polish & UX Hardening | Production-ready UI: responsive layout, error states, loading indicators, accessibility | — (cross-cutting) | ✅ 5/5 |
-| 6 | Vercel Deployment & CI | App deployed to Vercel with GitHub Actions CI; production environment validated | — (infrastructure) | 4 |
+| 6 | Vercel Deployment & CI | App deployed to Vercel with GitHub Actions CI; production environment validated | — (infrastructure) | ✅ 4/4 |
 
 ---
 
@@ -166,7 +166,7 @@
 
 ---
 
-### Phase 6: Vercel Deployment & CI
+### Phase 6: Vercel Deployment & CI (✅ COMPLETE)
 
 **Goal:** Ship to production on Vercel; set up GitHub Actions for CI on every pull request; validate production environment with Sharp (Node.js runtime, not Edge).
 
@@ -205,4 +205,4 @@
 ---
 *Roadmap created: 2026-04-23*
 *Milestone: M1 — MVP (v1)*
-*Next action: `/gsd-plan-phase 6`*
+*Next action: `Done! Project is complete.`*

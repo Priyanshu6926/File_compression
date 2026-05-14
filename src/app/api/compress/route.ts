@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server'
 import { compressToSize } from '@/lib/compress'
 import heicConvert from 'heic-convert'
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData()

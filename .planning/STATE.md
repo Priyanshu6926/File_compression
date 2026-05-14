@@ -5,16 +5,16 @@
 See: `.planning/PROJECT.md` (updated 2026-05-07)
 
 **Core value:** Upload any image → instantly get a file that meets exact format, dimension, and size requirements — no manual trial-and-error needed.
-**Current focus:** Phase 6 — Vercel Deployment & CI
+**Current focus:** MVP Complete!
 
 ---
 
 ## Current State
 
 **Status:** Complete
-**Active Phase:** Phase 5
-**Last action:** Phase 5 executed and verified successfully.
-**Next action:** `/gsd-plan-phase 6`
+**Active Phase:** None (MVP completed)
+**Last action:** Phase 6 executed and verified successfully.
+**Next action:** Explore backlog features (v2)
 
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-07)
 | 3 — Resize & Aspect Ratio Engine | Complete | 2026-05-11 |
 | 4 — Format Conversion | Complete | 2026-05-12 |
 | 5 — UI Polish & UX Hardening | Complete | 2026-05-13 |
-| 6 — Vercel Deployment & CI | Not started | — |
+| 6 — Vercel Deployment & CI | Complete | 2026-05-14 |
 
 ---
 
@@ -38,4 +38,4 @@ See: `.planning/PROJECT.md` (updated 2026-05-07)
 - RAW decode approach: delegated to sharp/libvips in Phase 4 (fallback on error)
 
 ---
-*Last updated: 2026-05-13 after Phase 5 completion*
+*Last updated: 2026-05-14 after Phase 6 completion*
