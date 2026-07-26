@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useRef, useState, DragEvent } from 'react'
-import { useProcessing } from '@/context/ProcessingContext'
+import { useAppStore } from '@/store/useAppStore'
 import { isFormatSupported, extractImageMetadata } from '@/lib/metadata'
 import { cn } from '@/lib/utils'
 
@@ -10,7 +10,7 @@ type UploadState = 'idle' | 'dragover' | 'loading' | 'error'
 const SUPPORTED_EXTENSIONS = '.heic,.heif,.jpg,.jpeg,.png,.webp,.avif,.tiff,.tif,.svg,.cr2,.nef,.arw,.dng,.raf,.rw2'
 
 export function UploadZone() {
-  const { setUploadedFile, clearFile, file: currentFile, preview } = useProcessing()
+  const { setUploadedFile, clearFile, file: currentFile, preview } = useAppStore()
   const [state, setState] = useState<UploadState>('idle')
   const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -46,20 +46,6 @@ export function UploadZone() {
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const picked = e.target.files?.[0]
     if (picked) processFile(picked)
-  }
-
-  const borderStyles: Record<UploadState, string> = {
-    idle:     'border-dashed border-2 border-black',
-    dragover: 'border-4 border-primary',
-    loading:  'border-2 border-success',
-    error:    'border-2 border-error',
-  }
-
-  const shadowStyles: Record<UploadState, string> = {
-    idle:     '',
-    dragover: 'scale-[1.01]',
-    loading:  '',
-    error:    '',
   }
 
   // If file is uploaded — show preview state

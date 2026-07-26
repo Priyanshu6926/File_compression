@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PicSize Pro — Extension Test Page</title>
+  <style>
+    body { font-family: 'Courier New', monospace; max-width: 700px; margin: 40px auto; padding: 20px; background: #f5f5f5; }
+    h1 { font-size: 24px; font-weight: 900; text-transform: uppercase; border-bottom: 3px solid #000; padding-bottom: 8px; }
+    .form-group { margin: 24px 0; background: #fff; border: 2px solid #000; padding: 20px; box-shadow: 4px 4px 0 0 #000; }
+    label { display: block; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+    input[type="file"] { border: 2px dashed #000; padding: 12px; width: 100%; cursor: pointer; background: #f9f9f9; font-family: inherit; }
+    input[type="text"], input[type="email"] { border: 2px solid #000; padding: 10px; width: 100%; font-family: inherit; margin-bottom: 12px; }
+    button[type="submit"] { background: #f5d547; border: 2px solid #000; padding: 12px 24px; font-family: inherit; font-weight: 900; text-transform: uppercase; cursor: pointer; box-shadow: 4px 4px 0 0 #000; font-size: 14px; }
+    .hint { font-size: 11px; color: #666; margin-top: 6px; }
+    .preview { margin-top: 12px; }
+    .preview img { max-width: 200px; max-height: 200px; border: 2px solid #000; object-fit: contain; }
+    #fileInfo { font-size: 11px; color: #333; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <h1>🧪 PicSize Pro — Extension Test</h1>
+  <p style="font-size:12px;color:#666;margin-bottom:24px;">
+    This simulates a government/exam portal with file upload requirements.
+    Use the PicSize Pro extension to compress your image and inject it here.
+  </p>
+
+  <form id="testForm">
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" placeholder="Priyanshu Kumar" />
+
+      <label>Email</label>
+      <input type="email" placeholder="priyanshu@example.com" />
+    </div>
+
+    <div class="form-group">
+      <label>📷 Passport Photo (JPEG only, max 50KB, 413×531px)</label>
+      <input type="file" id="passportPhoto" name="passport" accept="image/jpeg,image/jpg" />
+      <p class="hint">⚠ File must be JPEG format, under 50KB, and 413×531 pixels</p>
+      <div class="preview" id="preview1"></div>
+      <div id="fileInfo1"></div>
+    </div>
+
+    <div class="form-group">
+      <label>🪪 Signature (PNG only, max 20KB)</label>
+      <input type="file" id="signature" name="signature" accept="image/png" />
+      <p class="hint">⚠ File must be PNG format, under 20KB, white background</p>
+      <div class="preview" id="preview2"></div>
+    </div>
+
+    <button type="submit">SUBMIT APPLICATION</button>
+  </form>
+
+  <script>
+    // Show preview when file is selected (via extension or manually)
+    function setupPreview(inputId, previewId, infoId) {
+      const input = document.getElementById(inputId)
+      if (!input) return
+      input.addEventListener('change', () => {
+        const file = input.files[0]
+        if (!file) return
+        const url = URL.createObjectURL(file)
+        document.getElementById(previewId).innerHTML = `<img src="${url}" alt="preview" />`
+        if (infoId) {
+          document.getElementById(infoId).textContent =
+            `✅ File loaded: ${file.name} (${(file.size/1024).toFixed(1)} KB)`
+        }
+      })
+    }
+    setupPreview('passportPhoto', 'preview1', 'fileInfo1')
+    setupPreview('signature',     'preview2', null)
+
+    document.getElementById('testForm').addEventListener('submit', (e) => {
+      e.preventDefault()
+      alert('✅ Form submitted successfully! (This is a test page)')
+    })
+  </script>
+</body>
+</html>

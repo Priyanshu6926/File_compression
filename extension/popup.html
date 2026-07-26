@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PicSize Pro</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+
+  <!-- ── HEADER ── -->
+  <header class="header">
+    <div class="logo">&lt;PIC-TRANSFORM/&gt;</div>
+    <div class="header-right">
+      <button id="settingsBtn" class="icon-btn" title="Settings">⚙</button>
+    </div>
+  </header>
+
+  <!-- ── PAGE STATUS BAR ── -->
+  <div class="status-bar">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="statusText">Scanning page...</span>
+    <button id="rescanBtn" class="btn btn-ghost btn-sm" style="margin-left:auto;width:auto;padding:2px 8px;font-size:9px;">RESCAN</button>
+  </div>
+
+  <!-- ── SETTINGS PANEL (hidden by default) ── -->
+  <div id="settingsPanel" class="section hidden">
+    <span class="section-label">API Settings</span>
+    <div class="gap-6">
+      <div class="field-group">
+        <label>Server URL (localhost or Vercel URL)</label>
+        <div class="settings-row-api">
+          <input id="apiUrlInput" type="text" placeholder="http://localhost:3000" />
+          <button id="saveApiBtn" class="btn btn-primary btn-sm" style="width:auto;">SAVE</button>
+        </div>
+      </div>
+      <p style="font-size:10px;color:var(--muted);">Default: http://localhost:3000 · Change to your Vercel URL in production</p>
+    </div>
+  </div>
+
+  <!-- ── STEP 1: UPLOAD ── -->
+  <div id="uploadSection" class="section">
+    <span class="section-label">Step 1 — Upload Image</span>
+
+    <!-- Drop Zone (shown when no file) -->
+    <div id="dropZone" class="drop-zone">
+      <div class="upload-icon">↑</div>
+      <p>Drop image here</p>
+      <p class="sub">or click to browse</p>
+      <p class="formats">HEIC · RAW · PNG · JPG · WEBP · SVG · TIFF</p>
+      <input id="fileInput" type="file"
+        accept=".heic,.heif,.jpg,.jpeg,.png,.webp,.avif,.tiff,.tif,.svg,.cr2,.nef,.arw,.dng,.raf,.rw2,image/*"
+        style="display:none;" />
+    </div>
+
+    <!-- Preview (shown after upload) -->
+    <div id="previewWrap" class="preview-wrap hidden">
+      <img id="previewImg" alt="preview" />
+      <div class="preview-info">
+        <div class="preview-name" id="previewName"></div>
+        <div class="preview-size" id="previewSize"></div>
+      </div>
+      <button id="changeFileBtn" class="preview-change">Change</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: PRESET ── -->
+  <div id="presetSection" class="section hidden">
+    <span class="section-label">Step 2 — Choose Preset or Custom</span>
+    <div class="preset-grid" id="presetGrid">
+      <button class="preset-btn" data-preset="passport-india">🇮🇳 Passport India<br/><small style="font-weight:normal;font-size:9px;text-transform:none;">35×45mm · ≤50KB · JPEG</small></button>
+      <button class="preset-btn" data-preset="passport-us">🇺🇸 Passport US<br/><small style="font-weight:normal;font-size:9px;text-transform:none;">2×2in · ≤240KB · JPEG</small></button>
+      <button class="preset-btn" data-preset="aadhar">🪪 Aadhar / Voter ID<br/><small style="font-weight:normal;font-size:9px;text-transform:none;">213×213px · ≤20KB · JPEG</small></button>
+      <button class="preset-btn" data-preset="linkedin">💼 LinkedIn Profile<br/><small style="font-weight:normal;font-size:9px;text-transform:none;">400×400px · ≤8MB · JPEG</small></button>
+      <button class="preset-btn" data-preset="whatsapp">💬 WhatsApp DP<br/><small style="font-weight:normal;font-size:9px;text-transform:none;">500×500px · ≤100KB · JPEG</small></button>
+      <button class="preset-btn active" data-preset="custom">✏️ Custom<br/><small style="font-weight:normal;font-size:9px;text-transform:none;">Set your own specs</small></button>
+    </div>
+  </div>
+
+  <!-- ── STEP 2b: CUSTOM SETTINGS ── -->
+  <div id="customSection" class="section hidden">
+    <span class="section-label">Custom Settings</span>
+    <div class="gap-8">
+      <div class="fields-row">
+        <div class="field-group">
+          <label>Max Size (KB)</label>
+          <input id="targetSize" type="number" value="100" min="10" placeholder="100" />
+        </div>
+        <div class="field-group">
+          <label>Format</label>
+          <select id="formatSelect">
+            <option value="jpeg">JPG</option>
+            <option value="png">PNG</option>
+            <option value="webp">WEBP</option>
+            <option value="avif">AVIF</option>
+            <option value="tiff">TIFF</option>
+          </select>
+        </div>
+      </div>
+      <div class="fields-row">
+        <div class="field-group">
+          <label>Width (px)</label>
+          <input id="widthInput" type="number" placeholder="Auto" />
+        </div>
+        <div class="field-group">
+          <label>Height (px)</label>
+          <input id="heightInput" type="number" placeholder="Auto" />
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input id="smartCrop" type="checkbox" style="width:16px;height:16px;border:2px solid #000;accent-color:#f5d547;" />
+        <label for="smartCrop" style="font-size:11px;cursor:pointer;">Smart Crop (fill exact dimensions)</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: FILENAME ── -->
+  <div id="filenameSection" class="section hidden">
+    <span class="section-label">Step 3 — Output Filename</span>
+    <div class="field-group">
+      <label>Rename before injecting (optional)</label>
+      <input id="filenameInput" type="text" placeholder="compressed-photo.jpg" />
+    </div>
+  </div>
+
+  <!-- ── COMPRESS BUTTON ── -->
+  <div id="compressSection" class="section hidden">
+    <button id="compressBtn" class="btn btn-success">
+      <span>⚡ COMPRESS IMAGE</span>
+    </button>
+  </div>
+
+  <!-- ── STEP 4: RESULT + INJECT ── -->
+  <div id="resultSection" class="section hidden">
+    <div class="result-panel">
+      <div class="result-heading">✅ Compressed!</div>
+
+      <div id="warningBox" class="result-warning hidden">
+        ⚠ Could not reach target size — quality floor hit
+      </div>
+
+      <div class="result-stats">
+        <div>
+          <span style="color:var(--muted);font-size:10px;display:block;text-transform:uppercase;letter-spacing:0.08em;">New size</span>
+          <strong id="newSize" style="font-size:18px;color:var(--primary);"></strong>
+        </div>
+        <span id="savings" class="result-savings"></span>
+      </div>
+
+      <!-- Target input selector -->
+      <div id="targetSelector" class="target-selector">
+        <div>
+          <span>Target input</span>
+          <div class="target-info" id="targetInfo">Auto (first file input)</div>
+        </div>
+        <button id="pickInputBtn" class="btn btn-ghost btn-sm" style="width:auto;">
+          🎯 Pick
+        </button>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="gap-6 mt-2">
+        <button id="injectBtn" class="btn btn-inject">
+          💉 INJECT INTO PAGE
+        </button>
+        <button id="downloadBtn" class="btn btn-ghost">
+          ⬇ Download to Desktop
+        </button>
+      </div>
+
+      <div id="injectStatus" class="inject-status hidden"></div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,19 +1,23 @@
 'use client'
 
 import Link from 'next/link'
-import { useProcessing } from '@/context/ProcessingContext'
+import { useAppStore } from '@/store/useAppStore'
 import { NeoButton } from '@/components/ui/NeoButton'
 import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
+import { useSyncExternalStore } from "react"
 
 export function TrustHeader() {
-  const { mode, toggleMode } = useProcessing()
+  const { mode, toggleMode } = useAppStore()
   const isPrivate = mode === 'client'
   
+  // useSyncExternalStore is the Next.js-recommended way to detect client-side mount
+  // without triggering the react-hooks/set-state-in-effect lint rule
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  )
   const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => setMounted(true), [])
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-[60px] bg-base border-b-2 border-black flex items-center justify-between px-6">

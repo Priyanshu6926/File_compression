@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ProcessingProvider } from "@/context/ProcessingContext";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import "./globals.css";
 
@@ -32,10 +31,8 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-base text-text-base selection:bg-primary selection:text-black">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <ProcessingProvider>
             {children}
-          </ProcessingProvider>
-        </ThemeProvider>
+          </ThemeProvider>
       </body>
     </html>
   );

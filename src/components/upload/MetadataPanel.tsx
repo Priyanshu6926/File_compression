@@ -1,9 +1,9 @@
 'use client'
 
-import { useProcessing } from '@/context/ProcessingContext'
+import { useAppStore } from '@/store/useAppStore'
 
 export function MetadataPanel() {
-  const { fileMetadata, clearFile } = useProcessing()
+  const { fileMetadata, clearFile } = useAppStore()
 
   if (!fileMetadata) return null
 

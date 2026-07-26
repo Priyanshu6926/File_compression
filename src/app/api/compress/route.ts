@@ -6,6 +6,18 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
+// CORS headers — allow Chrome extension and any origin to call this API
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Requested-With',
+}
+
+// Handle CORS preflight (OPTIONS) request from extension
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS_HEADERS })
+}
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData()
@@ -22,7 +34,10 @@ export async function POST(request: Request) {
     const height = heightRaw ? Number(heightRaw) : undefined
 
     if (!file || !targetSizeKB) {
-      return NextResponse.json({ error: 'Missing file or targetSizeKB' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Missing file or targetSizeKB' },
+        { status: 400, headers: CORS_HEADERS }
+      )
     }
 
     let buffer = Buffer.from(await file.arrayBuffer())
@@ -32,7 +47,7 @@ export async function POST(request: Request) {
     const isHeic = file.name.toLowerCase().endsWith('.heic') || file.type === 'image/heic'
     if (isHeic) {
       const decodedBuffer = await heicConvert({
-        buffer: buffer as any,
+        buffer: buffer as unknown as Parameters<typeof heicConvert>[0]['buffer'],
         format: 'JPEG',
         quality: 1 // high quality decode before compression
       });
@@ -68,6 +83,7 @@ export async function POST(request: Request) {
     return new NextResponse(new Uint8Array(result.buffer), {
       status: 200,
       headers: {
+        ...CORS_HEADERS,
         'Content-Type': mimeType,
         'Content-Disposition': `attachment; filename="compressed-${baseName}.${extension}"`,
         'X-Compression-Quality': result.quality.toString(),
@@ -78,6 +94,9 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('Compression error:', error)
-    return NextResponse.json({ error: 'Compression failed' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Compression failed' },
+      { status: 500, headers: CORS_HEADERS }
+    )
   }
 }
