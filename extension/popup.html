@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PicSize Pro</title>
+  <title>PicSize Pro — Upload Assistant</title>
   <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
@@ -21,6 +21,28 @@
     <span class="status-dot" id="statusDot"></span>
     <span id="statusText">Scanning page...</span>
     <button id="rescanBtn" class="btn btn-ghost btn-sm" style="margin-left:auto;width:auto;padding:2px 8px;font-size:9px;">RESCAN</button>
+  </div>
+
+  <!-- ── SMART AUTO-DETECTED BANNER ── -->
+  <div id="smartBanner" class="smart-banner hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <span class="smart-title">⚡ Smart Auto-Detect</span>
+      <span id="smartMatchScore" class="smart-badge">95% MATCH</span>
+    </div>
+    <p id="smartSnippet" class="smart-text">Auto-detected rules from page HTML</p>
+    <div style="display:flex;gap:6px;margin-top:6px;">
+      <button id="applySmartBtn" class="btn btn-primary btn-sm" style="flex:1;padding:4px 8px;font-size:10px;">
+        ✨ Auto-Fill Specs
+      </button>
+      <button id="saveProfileBtn" class="btn btn-ghost btn-sm" style="width:auto;padding:4px 8px;font-size:10px;" title="Save profile for this domain">
+        ⭐ Save Site Profile
+      </button>
+    </div>
+  </div>
+
+  <!-- ── SAVED SITE PROFILE BANNER ── -->
+  <div id="domainBanner" class="domain-banner hidden">
+    <span>⭐ Loaded profile for <strong id="domainName"></strong></span>
   </div>
 
   <!-- ── SETTINGS PANEL (hidden by default) ── -->
@@ -79,7 +101,7 @@
 
   <!-- ── STEP 2b: CUSTOM SETTINGS ── -->
   <div id="customSection" class="section hidden">
-    <span class="section-label">Custom Settings</span>
+    <span class="section-label">Target Specifications</span>
     <div class="gap-8">
       <div class="fields-row">
         <div class="field-group">
@@ -133,7 +155,7 @@
   <!-- ── STEP 4: RESULT + INJECT ── -->
   <div id="resultSection" class="section hidden">
     <div class="result-panel">
-      <div class="result-heading">✅ Compressed!</div>
+      <div class="result-heading">✅ Compressed & Ready!</div>
 
       <div id="warningBox" class="result-warning hidden">
         ⚠ Could not reach target size — quality floor hit

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────
-// PicSize Pro — Popup Script
+// PicSize Pro — Popup Script with Smart Auto-Detect & Domain Profiles
 // ─────────────────────────────────────────────────────────────────
 
 // ── PRESET DEFINITIONS ─────────────────────────────────────────
@@ -21,6 +21,8 @@ let originalSize     = 0
 let selectedPreset   = 'custom'
 let targetInputIndex = 0      // which file input on the page to target
 let apiUrl           = 'http://localhost:3000'
+let currentDomain    = ''
+let detectedRules    = null
 
 // ── DOM REFS ────────────────────────────────────────────────────
 const $ = (id) => document.getElementById(id)
@@ -33,7 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('apiUrlInput').value = apiUrl
   if (stored.targetInputIndex != null) targetInputIndex = stored.targetInputIndex
 
-  // Scan the page for file inputs
+  // Scan page & read DOM rules via message
   await scanPage()
 
   wireEvents()
@@ -45,34 +47,85 @@ async function scanPage() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
     if (!tab?.id) { setStatus('error', 'Cannot access this page'); return }
 
-    const results = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: () => {
-        const inputs = Array.from(document.querySelectorAll('input[type="file"]'))
-        return inputs.map((inp, i) => ({
-          index: i,
-          id: inp.id || '',
-          name: inp.name || '',
-          accept: inp.accept || '',
-          label: (() => {
-            // Try to find associated label text
-            const labelEl = inp.id ? document.querySelector(`label[for="${inp.id}"]`) : null
-            return (labelEl?.textContent || inp.getAttribute('aria-label') || '').trim().slice(0, 60)
-          })()
-        }))
-      }
-    })
+    // Try messaging content.js for parsed inputs
+    const response = await chrome.tabs.sendMessage(tab.id, { type: 'GET_INPUTS' }).catch(() => null)
 
-    const inputs = results[0]?.result ?? []
-    if (inputs.length > 0) {
-      setStatus('active', `${inputs.length} file input${inputs.length > 1 ? 's' : ''} detected on this page`)
-      updateTargetInfo(inputs)
+    if (response && response.inputs?.length > 0) {
+      currentDomain = response.domain || ''
+      setStatus('active', `${response.inputs.length} file input${response.inputs.length > 1 ? 's' : ''} detected on page`)
+      updateTargetInfo(response.inputs)
+
+      // Get parsed rules for the active target input
+      const targetInput = response.inputs[targetInputIndex] || response.inputs[0]
+      if (targetInput?.parsedRules) {
+        handleDetectedRules(targetInput.parsedRules)
+      }
+
+      // Check for saved domain profile
+      checkDomainProfile(currentDomain)
     } else {
-      setStatus('warning', 'No file inputs found — navigate to a form page')
-      $('targetSelector') && $('targetSelector').classList.add('hidden')
+      // Fallback scripting execute if content.js not ready
+      const results = await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: () => {
+          const inputs = Array.from(document.querySelectorAll('input[type="file"]'))
+          return inputs.map((inp, i) => ({
+            index: i,
+            id: inp.id || '',
+            name: inp.name || '',
+            accept: inp.accept || '',
+            label: (() => {
+              const labelEl = inp.id ? document.querySelector(`label[for="${inp.id}"]`) : null
+              return (labelEl?.textContent || inp.getAttribute('aria-label') || '').trim().slice(0, 60)
+            })()
+          }))
+        }
+      })
+
+      const inputs = results[0]?.result ?? []
+      if (inputs.length > 0) {
+        setStatus('active', `${inputs.length} file input${inputs.length > 1 ? 's' : ''} detected on this page`)
+        updateTargetInfo(inputs)
+      } else {
+        setStatus('warning', 'No file inputs found — navigate to a form page')
+        $('targetSelector') && $('targetSelector').classList.add('hidden')
+      }
     }
   } catch (e) {
     setStatus('error', 'Cannot access this page (restricted URL)')
+  }
+}
+
+function handleDetectedRules(rules) {
+  detectedRules = rules
+  if (rules && (rules.targetSizeKB || rules.format || rules.width)) {
+    const banner = $('smartBanner')
+    if (banner) {
+      banner.classList.remove('hidden')
+      $('smartMatchScore').textContent = `${Math.min(rules.confidence || 75, 98)}% MATCH`
+
+      let snippetText = 'Detected:'
+      if (rules.targetSizeKB) snippetText += ` max ${rules.targetSizeKB}KB`
+      if (rules.format) snippetText += ` ${rules.format.toUpperCase()}`
+      if (rules.width && rules.height) snippetText += ` (${rules.width}x${rules.height}px)`
+      $('smartSnippet').textContent = snippetText
+    }
+  }
+}
+
+async function checkDomainProfile(domain) {
+  if (!domain) return
+  const key = `profile_${domain}`
+  const saved = await chrome.storage.sync.get([key])
+  if (saved[key]) {
+    const prof = saved[key]
+    const banner = $('domainBanner')
+    if (banner) {
+      banner.classList.remove('hidden')
+      $('domainName').textContent = domain
+    }
+    // Auto-apply saved domain profile
+    applyCustomSpecs(prof.targetSizeKB, prof.format, prof.width, prof.height)
   }
 }
 
@@ -106,6 +159,36 @@ function wireEvents() {
     await chrome.storage.sync.set({ apiUrl })
     $('settingsPanel').classList.add('hidden')
     flashStatus('✅ API URL saved!')
+  })
+
+  // Apply Smart Specs
+  $('applySmartBtn')?.addEventListener('click', () => {
+    if (!detectedRules) return
+    applyCustomSpecs(
+      detectedRules.targetSizeKB || 100,
+      detectedRules.format || 'jpeg',
+      detectedRules.width || '',
+      detectedRules.height || ''
+    )
+    flashStatus('✨ Specs auto-filled from page!')
+  })
+
+  // Save Site Profile
+  $('saveProfileBtn')?.addEventListener('click', async () => {
+    if (!currentDomain) return
+    const profile = {
+      targetSizeKB: Number($('targetSize').value),
+      format: $('formatSelect').value,
+      width: $('widthInput').value,
+      height: $('heightInput').value,
+    }
+    await chrome.storage.sync.set({ [`profile_${currentDomain}`]: profile })
+    const banner = $('domainBanner')
+    if (banner) {
+      banner.classList.remove('hidden')
+      $('domainName').textContent = currentDomain
+    }
+    flashStatus(`⭐ Profile saved for ${currentDomain}!`)
   })
 
   // Rescan
@@ -186,7 +269,7 @@ function handleFile(file) {
   const ext = $('formatSelect').value === 'jpeg' ? 'jpg' : $('formatSelect').value
   $('filenameInput').value = `compressed-${base}.${ext}`
 
-  // Reset to custom preset
+  // Apply preset
   applyPreset(selectedPreset)
 }
 
@@ -194,26 +277,22 @@ function handleFile(file) {
 function applyPreset(id) {
   const preset = PRESETS[id]
   if (!preset) {
-    // Custom — show fields, keep current values
     show('customSection')
     return
   }
 
-  // Fill fields from preset
-  $('targetSize').value = preset.targetSizeKB
-  $('formatSelect').value = preset.format
-  $('widthInput').value  = preset.width  || ''
-  $('heightInput').value = preset.height || ''
-  $('smartCrop').checked = !!preset.crop
-  $('filenameInput').value = preset.filename
+  applyCustomSpecs(preset.targetSizeKB, preset.format, preset.width, preset.height, preset.filename)
+}
 
-  // For non-custom presets, hide custom fields (they're auto-set)
-  if (id !== 'custom') {
-    hide('customSection')
-    show('customSection') // keep visible but auto-filled for transparency
-  }
+function applyCustomSpecs(sizeKB, format, w, h, filename) {
+  if (sizeKB) $('targetSize').value = sizeKB
+  if (format) $('formatSelect').value = format
+  $('widthInput').value  = w  || ''
+  $('heightInput').value = h || ''
+  $('smartCrop').checked = !!(w && h)
+  if (filename) $('filenameInput').value = filename
 
-  // Update filename extension when format changes
+  show('customSection')
   updateFilenameExt()
 }
 
@@ -221,7 +300,7 @@ $('formatSelect')?.addEventListener('change', updateFilenameExt)
 function updateFilenameExt() {
   const ext = $('formatSelect').value === 'jpeg' ? 'jpg' : $('formatSelect').value
   const current = $('filenameInput').value
-  $('filenameInput').value = current.replace(/\.[^.]+$/, '') + '.' + ext
+  if (current) $('filenameInput').value = current.replace(/\.[^.]+$/, '') + '.' + ext
 }
 
 // ── COMPRESSION ──────────────────────────────────────────────────
@@ -289,7 +368,6 @@ async function injectIntoPage() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
     if (!tab?.id) throw new Error('No active tab found')
 
-    // Convert buffer to base64 for message passing (ArrayBuffer is not directly serializable)
     const uint8 = new Uint8Array(compressedBuffer)
     const base64 = btoa(String.fromCharCode(...uint8))
 
@@ -302,7 +380,6 @@ async function injectIntoPage() {
     const result = results[0]?.result
     if (result?.success) {
       showInjectStatus('success', `✅ ${result.message}`)
-      // Update badge on extension icon
       chrome.action.setBadgeText({ text: '✓', tabId: tab.id })
       chrome.action.setBadgeBackgroundColor({ color: '#17cf97', tabId: tab.id })
     } else {
@@ -313,37 +390,28 @@ async function injectIntoPage() {
   }
 }
 
-// This function runs IN THE PAGE CONTEXT (injected via scripting.executeScript)
 function injectFileIntoInput(base64Data, filename, mimeType, inputIndex) {
   try {
-    // Decode base64 → Uint8Array
     const binary = atob(base64Data)
     const bytes  = new Uint8Array(binary.length)
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
 
-    // Create File object
     const file = new File([bytes], filename, { type: mimeType, lastModified: Date.now() })
 
-    // Find all file inputs on the page
     const inputs = Array.from(document.querySelectorAll('input[type="file"]'))
     if (inputs.length === 0) return { success: false, error: 'No file inputs found on this page' }
 
     const target = inputs[inputIndex] || inputs[0]
     if (!target) return { success: false, error: 'Target input not found' }
 
-    // ── THE MAGIC: DataTransfer API ──────────────────────────
     const dt = new DataTransfer()
     dt.items.add(file)
     target.files = dt.files
-    // ─────────────────────────────────────────────────────────
 
-    // Dispatch events so React/Vue/Angular forms detect the change
     target.dispatchEvent(new Event('change', { bubbles: true }))
     target.dispatchEvent(new Event('input',  { bubbles: true }))
-    // Also dispatch a custom event some frameworks listen to
     target.dispatchEvent(new InputEvent('change', { bubbles: true, cancelable: true }))
 
-    // Visual feedback — highlight the injected input briefly
     const originalOutline = target.style.outline
     const originalBoxShadow = target.style.boxShadow
     target.style.outline = '3px solid #17cf97'
@@ -353,7 +421,6 @@ function injectFileIntoInput(base64Data, filename, mimeType, inputIndex) {
       target.style.boxShadow = originalBoxShadow
     }, 2500)
 
-    // Scroll to the input so user can see it
     target.scrollIntoView({ behavior: 'smooth', block: 'center' })
 
     const label = target.id
@@ -377,13 +444,11 @@ async function startPickMode() {
 
     showInjectStatus('info', '🎯 Click a file input on the page...')
 
-    // Inject click listener into page
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: activatePickMode,
     })
 
-    // Listen for the user's pick result
     chrome.runtime.onMessage.addListener(function onPick(msg) {
       if (msg.type === 'INPUT_PICKED') {
         targetInputIndex = msg.index
@@ -402,7 +467,6 @@ function activatePickMode() {
   const inputs = Array.from(document.querySelectorAll('input[type="file"]'))
   if (inputs.length === 0) return
 
-  // Highlight all inputs
   inputs.forEach((inp, i) => {
     inp.style.outline = '3px dashed #f5d547'
     inp.style.boxShadow = '0 0 16px rgba(245,213,71,0.6)'
@@ -411,13 +475,11 @@ function activatePickMode() {
     const handler = (e) => {
       e.preventDefault()
       e.stopPropagation()
-      // Reset all highlights
       inputs.forEach(el => {
         el.style.outline = ''
         el.style.boxShadow = ''
         el.removeEventListener('click', el._picksizeHandler, true)
       })
-      // Notify popup
       const label = inp.id
         ? (document.querySelector(`label[for="${inp.id}"]`)?.textContent || '').trim()
         : ''
@@ -432,7 +494,6 @@ function activatePickMode() {
     inp.addEventListener('click', handler, true)
   })
 
-  // Auto-cancel after 10s
   setTimeout(() => {
     inputs.forEach(el => {
       el.style.outline = ''
@@ -470,7 +531,7 @@ function hideStatus() {
 function flashStatus(msg) {
   const old = $('statusText').textContent
   $('statusText').textContent = msg
-  setTimeout(() => { $('statusText').textContent = old }, 2000)
+  setTimeout(() => { $('statusText').textContent = old }, 2200)
 }
 
 function formatBytes(bytes) {

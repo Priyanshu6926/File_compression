@@ -97,6 +97,44 @@ body {
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
 #statusText { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
 
+/* ── Smart Banner (Auto-detect & Domain Profiles) ── */
+.smart-banner {
+  background: #2b2111;
+  border-bottom: 2px solid var(--black);
+  padding: 10px 14px;
+  border-left: 4px solid var(--primary);
+}
+.smart-title {
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.smart-badge {
+  font-size: 9px;
+  font-weight: 900;
+  background: var(--primary);
+  color: var(--black);
+  padding: 1px 6px;
+  border: 1px solid var(--black);
+  letter-spacing: 0.08em;
+}
+.smart-text {
+  font-size: 10px;
+  color: var(--text);
+  line-height: 1.3;
+}
+.domain-banner {
+  background: #112820;
+  border-bottom: 2px solid var(--black);
+  padding: 6px 14px;
+  font-size: 10px;
+  color: var(--success);
+  font-weight: bold;
+  border-left: 4px solid var(--success);
+}
+
 /* ── Settings Panel ── */
 .settings-panel {
   padding: 12px 14px;

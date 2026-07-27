@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import "./globals.css";
@@ -14,8 +14,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PicSize Pro | Neo-Brutalist Image Transformer",
-  description: "High-performance web-based utility that handles Any-to-Any image conversion and intelligent document optimization.",
+  title: "PicSize Pro | Neo-Brutalist Image Transformer & Upload Assistant",
+  description: "High-performance web utility for any-to-any image conversion, target-size compression, PDF export, and automated form injection.",
+  manifest: "/manifest.json",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#f5d547",
 };
 
 export default function RootLayout({

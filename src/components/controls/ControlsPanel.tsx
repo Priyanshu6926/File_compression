@@ -24,7 +24,9 @@ export function ControlsPanel() {
   const [height, setHeight] = useState('')
   const [isSmartCrop, setIsSmartCrop] = useState(false)
   const [cropAnchor, setCropAnchor] = useState<'center' | 'top' | 'entropy'>('center')
-  const [format, setFormat] = useState<'jpeg' | 'png' | 'webp' | 'avif' | 'tiff'>('jpeg')
+  const [format, setFormat] = useState<'jpeg' | 'png' | 'webp' | 'avif' | 'tiff' | 'pdf'>('jpeg')
+  const [rotation, setRotation] = useState<number>(0)
+  const [watermarkText, setWatermarkText] = useState('')
 
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -36,7 +38,7 @@ export function ControlsPanel() {
   } | null>(null)
 
   const handleApplyPreset = (preset: Preset) => {
-    setFormat(preset.format)
+    setFormat(preset.format as 'jpeg' | 'png' | 'webp' | 'avif' | 'tiff')
     setTargetSize(String(preset.targetSizeKB))
     setWidth(preset.width ? String(preset.width) : '')
     setHeight(preset.height ? String(preset.height) : '')
@@ -63,13 +65,15 @@ export function ControlsPanel() {
       if (width) formData.append('width', width)
       if (height) formData.append('height', height)
       if (isSmartCrop) formData.append('crop', cropAnchor)
+      if (rotation > 0) formData.append('rotation', String(rotation))
+      if (watermarkText.trim()) formData.append('watermarkText', watermarkText.trim())
 
       const res = await fetch('/api/compress', { method: 'POST', body: formData })
       if (!res.ok) throw new Error('Compression failed')
 
       const blob = await res.blob()
       const url = URL.createObjectURL(blob)
-      const newSize = Number(res.headers.get('X-New-Size'))
+      const newSize = Number(res.headers.get('X-New-Size')) || blob.size
       const hitFloor = res.headers.get('X-Hit-Floor') === 'true'
       const ext = format === 'jpeg' ? 'jpg' : format
 
@@ -97,7 +101,7 @@ export function ControlsPanel() {
     { key: 'ai', label: 'AI Tools', icon: '🤖' },
   ]
 
-  const formatOptions = ['jpeg', 'png', 'webp', 'avif', 'tiff'] as const
+  const formatOptions = ['jpeg', 'png', 'webp', 'avif', 'tiff', 'pdf'] as const
 
   return (
     <div className="flex flex-col gap-6">
@@ -145,7 +149,7 @@ export function ControlsPanel() {
                   {/* Format */}
                   <div>
                     <p className="font-mono text-muted text-xs uppercase tracking-widest mb-4">
-                      Target Format
+                      Target Format & Document
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {formatOptions.map((opt) => (
@@ -159,7 +163,7 @@ export function ControlsPanel() {
                               : 'bg-surface text-text-base hover:bg-surface-alt hover:-translate-y-0.5 hover:-translate-x-0.5 hover:shadow-[2px_2px_0px_0px_#000]'
                           )}
                         >
-                          {opt === 'jpeg' ? 'jpg' : opt}
+                          {opt === 'jpeg' ? 'jpg' : opt === 'pdf' ? '📄 PDF' : opt}
                         </button>
                       ))}
                     </div>
@@ -182,14 +186,14 @@ export function ControlsPanel() {
                     </div>
                   </div>
 
-                  {/* Dimensions */}
+                  {/* Dimensions & Rotation */}
                   <div className="border-t-2 border-black pt-6">
                     <p className="font-mono text-muted text-xs uppercase tracking-widest mb-4">
-                      Resize Options (px)
+                      Resize & Rotation
                     </p>
                     <div className="flex gap-4 mb-4">
                       <div className="flex-1">
-                        <label className="text-xs font-mono text-muted mb-1 block">Width</label>
+                        <label className="text-xs font-mono text-muted mb-1 block">Width (px)</label>
                         <NeoInput
                           type="number"
                           value={width}
@@ -198,13 +202,32 @@ export function ControlsPanel() {
                         />
                       </div>
                       <div className="flex-1">
-                        <label className="text-xs font-mono text-muted mb-1 block">Height</label>
+                        <label className="text-xs font-mono text-muted mb-1 block">Height (px)</label>
                         <NeoInput
                           type="number"
                           value={height}
                           onChange={(e) => setHeight(e.target.value)}
                           placeholder="Auto"
                         />
+                      </div>
+                    </div>
+
+                    {/* Rotation selector */}
+                    <div className="mb-4">
+                      <label className="text-xs font-mono text-muted mb-2 block">Rotate Image</label>
+                      <div className="flex gap-2">
+                        {[0, 90, 180, 270].map((deg) => (
+                          <button
+                            key={deg}
+                            onClick={() => setRotation(deg)}
+                            className={cn(
+                              'border-2 border-black font-mono text-xs px-3 py-1',
+                              rotation === deg ? 'bg-primary text-black font-bold' : 'bg-surface text-muted'
+                            )}
+                          >
+                            {deg === 0 ? '0° (Normal)' : `${deg}°`}
+                          </button>
+                        ))}
                       </div>
                     </div>
 
@@ -239,6 +262,19 @@ export function ControlsPanel() {
                         ))}
                       </div>
                     )}
+                  </div>
+
+                  {/* Watermarking */}
+                  <div className="border-t-2 border-black pt-6">
+                    <p className="font-mono text-muted text-xs uppercase tracking-widest mb-2">
+                      ✍️ Add Text Watermark
+                    </p>
+                    <NeoInput
+                      type="text"
+                      value={watermarkText}
+                      onChange={(e) => setWatermarkText(e.target.value)}
+                      placeholder="e.g. CONFIDENTIAL / SAMPLE"
+                    />
                   </div>
 
                   {/* AI Background Removal inline */}
@@ -340,11 +376,11 @@ export function ControlsPanel() {
                 download={`compressed-${file?.name || 'image'}.${result.format}`}
                 className="inline-flex items-center justify-center border-2 border-black bg-primary text-black font-mono font-bold text-sm uppercase tracking-tight px-4 py-3 w-full hover:bg-white transition-colors"
               >
-                ⬇ DOWNLOAD
+                ⬇ DOWNLOAD {result.format.toUpperCase()}
               </a>
 
               {/* Before/After comparison */}
-              {preview && (
+              {preview && result.format !== 'pdf' && (
                 <CompareSlider
                   originalUrl={preview}
                   compressedUrl={result.url}
