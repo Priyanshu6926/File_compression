@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import path from 'path'
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ['sharp', 'heic-convert'],
@@ -18,7 +19,7 @@ const nextConfig: NextConfig = {
 
   // Turbopack config (Next.js 16 default bundler)
   turbopack: {
-    // WASM support is built-in to Turbopack — no extra config needed
+    root: path.resolve(__dirname),
   },
 }
 
